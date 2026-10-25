@@ -1,0 +1,2 @@
+cd ~/VulnTrack
+echo -e "__pycache__/\n*.pyc\n.env\nvenv/" > .gitignore
