@@ -1,138 +1,25 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <title>VulnTrack</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="/">🛡️ VulnTrack</a>
-            <div class="navbar-nav ms-auto align-items-center">
-                {% if session.username %}
-                    <span class="nav-item nav-link text-light me-3">
-                        Zalogowany: <strong>{{ session.username }}</strong> 
-                        <span class="badge bg-secondary">{{ session.role }}</span>
-                    </span>
-                    <a class="btn btn-outline-danger btn-sm" href="/logout">Wyloguj</a>
-                {% else %}
-                    <a class="btn btn-success btn-sm" href="/login">Zaloguj się</a>
-                {% endif %}
-            </div>
-        </div>
-    </nav>
-
-    <div class="container mt-4 mb-5">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        {% if login_page %}
-            <div class="card mx-auto mt-5 shadow-sm" style="max-width: 400px;">
-                <div class="card-body">
-                    <h4 class="card-title text-center mb-4">Logowanie</h4>
-                    <form method="POST" action="/login">
-                        <div class="mb-3">
-                            <label class="form-label">Login</label>
-                            <input type="text" name="username" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Hasło</label>
-                            <input type="password" name="password" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Zaloguj</button>
-                    </form>
-                    <div class="mt-3 text-muted small text-center">
-                        Konta testowe: <b>admin / admin</b> lub <b>user / user</b>
-                    </div>
-                </div>
-            </div>
-        {% else %}
-
-            <!-- PANEL ADMINA: OCZEKUJĄCE POSTY -->
-            {% if session.role == 'admin' and pending_reports %}
-                <div class="card border-warning mb-4 shadow-sm">
-                    <div class="card-header bg-warning text-dark fw-bold">
-                        ⏳ Posty oczekujące na akceptację ({{ pending_reports|length }})
-                    </div>
-                    <div class="card-body">
-                        {% for report in pending_reports %}
-                            <div class="border-bottom pb-3 mb-3">
-                                <h5>{{ report.title }} <span class="badge bg-dark">{{ report.severity }}</span></h5>
-                                <p class="mb-1">{{ report.description }}</p>
-                                <small class="text-muted">Autor: {{ report.author }} | Data: {{ report.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
-                                <div class="mt-2">
-                                    <form method="POST" action="/approve/{{ report.id }}" class="d-inline">
-                                        <button class="btn btn-success btn-sm">✓ Akceptuj</button>
-                                    </form>
-                                    <form method="POST" action="/delete/{{ report.id }}" class="d-inline">
-                                        <button class="btn btn-danger btn-sm">✕ Odrzuć</button>
-                                    </form>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
-
-            <!-- NAGŁÓWEK I PRZYCISK DODAWANIA -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h3>Opublikowane podatności</h3>
-                {% if session.username %}
-                    <a href="/add_report" class="btn btn-primary">+ Dodaj nowy post</a>
-                {% endif %}
-            </div>
-
-            <!-- LISTA ZAAKCEPTOWANYCH POSTÓW -->
-            {% for report in reports %}
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-header d-flex justify-content-between align-items-center bg-white">
-                        <h5 class="mb-0">{{ report.title }}</h5>
-                        <div>
-                            <span class="badge bg-danger">{{ report.severity }}</span>
-                            {% if session.role == 'admin' %}
-                                <form method="POST" action="/delete/{{ report.id }}" class="d-inline ms-2">
-                                    <button class="btn btn-outline-danger btn-sm py-0">Usuń</button>
-                                </form>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">{{ report.description }}</p>
-                        <small class="text-muted">Dodane przez: <strong>{{ report.author }}</strong> ({{ report.created_at.strftime('%Y-%m-%d %H:%M') }})</small>
-                    </div>
-                    
-                    <!-- SEKCJA KOMENTARZY -->
-                    <div class="card-footer bg-light">
-                        <h6 class="text-muted mb-2">Komentarze:</h6>
-                        {% if comments.get(report.id) %}
-                            {% for c in comments[report.id] %}
-                                <div class="mb-2 p-2 bg-white rounded border">
-                                    <strong>{{ c.author }}:</strong> {{ c.content }}
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <p class="text-muted small mb-2">Brak komentarzy.</p>
-                        {% endif %}
-
-                        {% if session.username %}
-                            <form method="POST" action="/comment/{{ report.id }}" class="mt-2 d-flex gap-2">
-                                <input type="text" name="content" class="form-control form-control-sm" placeholder="Napisz komentarz..." required>
-                                <button type="submit" class="btn btn-secondary btn-sm">Wyślij</button>
-                            </form>
-                        {% endif %}
-                    </div>
-                </div>
-            {% else %}
-                <div class="alert alert-secondary text-center">Brak opublikowanych postów.</div>
-            {% endfor %}
-
-        {% endif %}
-    </div>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}{{ 'Moderacja' if scope=='admin' else 'Moje zgłoszenia' if scope=='mine' else 'Centrum zgłoszeń' }}{% endblock %}
+{% block breadcrumb %}{{ 'Moderacja' if scope=='admin' else 'Moje zgłoszenia' if scope=='mine' else 'Centrum zgłoszeń' }}{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">BEZPIECZEŃSTWO POD KONTROLĄ</div><h1>{{ 'Panel moderacji' if scope=='admin' else 'Moje zgłoszenia' if scope=='mine' else 'Centrum zgłoszeń' }}</h1><p>{{ 'Weryfikuj zgłoszenia i zarządzaj ich publikacją.' if scope=='admin' else 'Śledź swoje zgłoszenia — od pierwszego opisu do rozwiązania.' if scope=='mine' else 'Jedno miejsce na zgłoszenia, analizę i skuteczne rozwiązania.' }}</p></div>
+<a class="button button-primary" href="{{ url_for('add_report') }}">{{ icon('plus') }} Zgłoś podatność</a></div>
+<section class="stats-grid" aria-label="Statystyki opublikowanych zgłoszeń">
+{% for label,value,type,desc,ico in [('Wszystkie zgłoszenia',stats.total,'blue','Opublikowane w projekcie','folder'),('Otwarte zgłoszenia',stats.active,'amber','Nowe i w trakcie analizy','activity'),('Krytyczne podatności',stats.critical,'red','Otwarte, najwyższy priorytet','alert'),('Naprawione',stats.fixed,'green','Zamknięte zgłoszenia','check-circle')] %}
+<div class="stat-card"><div class="stat-top"><span>{{ label }}</span><span class="stat-icon {{ type }}">{{ icon(ico) }}</span></div><div class="stat-value">{{ value }}</div><div class="stat-description">{% if type=='green' %}<span class="dot green-dot"></span>{% endif %}{{ desc }}</div></div>{% endfor %}
+</section>
+{% if scope=='admin' %}<div class="tabs" aria-label="Stan publikacji">{% for value,label in [('pending','Do akceptacji'),('approved','Opublikowane'),('all','Wszystkie')] %}<a class="{{ 'selected' if request.args.get('moderation','pending')==value }}" href="{{ url_for('admin_panel',moderation=value) }}">{{ label }}{% if value=='pending' %}<span>{{ pending }}</span>{% endif %}</a>{% endfor %}</div>{% endif %}
+<section class="panel reports-panel"><div class="panel-heading"><div><h2>{{ 'Zgłoszenia do weryfikacji' if scope=='admin' and request.args.get('moderation','pending')=='pending' else 'Twoje zgłoszenia' if scope=='mine' else 'Lista zgłoszeń' }}<span class="count">{{ total }}</span></h2><p>{{ 'Autorzy widzą własne wpisy przed akceptacją. Publikacja jest decyzją administratora.' if scope=='admin' else 'Bądź na bieżąco z bezpieczeństwem projektu.' }}</p></div><span class="muted small">Najnowsze jako pierwsze</span></div>
+<form method="get" class="filters" aria-label="Filtry zgłoszeń">
+{% if scope=='admin' %}<input type="hidden" name="moderation" value="{{ request.args.get('moderation','pending') }}">{% endif %}
+<div class="search-field">{{ icon('search') }}<label class="visually-hidden" for="q">Szukaj zgłoszeń</label><input id="q" type="search" name="q" value="{{ request.args.get('q','') }}" placeholder="Szukaj po tytule lub opisie…" maxlength="150"></div>
+<label class="visually-hidden" for="severity">Poziom zagrożenia</label><select name="severity" id="severity"><option value="">Każdy poziom</option>{% for s in severities %}<option {{ 'selected' if request.args.get('severity')==s }}>{{ s }}</option>{% endfor %}</select>
+<label class="visually-hidden" for="status">Status</label><select name="status" id="status"><option value="">Każdy status</option>{% for s in statuses %}<option {{ 'selected' if request.args.get('status')==s }}>{{ s }}</option>{% endfor %}</select><button class="button button-light">{{ icon('filter') }} Filtruj</button>
+{% if request.args.get('q') or request.args.get('severity') or request.args.get('status') %}<a class="clear-filter" href="{{ url_for(request.endpoint) }}">Wyczyść</a>{% endif %}</form>
+<div class="table-scroll"><table class="reports-table"><thead><tr><th>Zgłoszenie</th><th>Poziom zagrożenia</th><th>Status</th><th>Autor</th><th>Dodano</th><th><span class="visually-hidden">Otwórz</span></th></tr></thead><tbody>
+{% for report in reports %}<tr><td><a class="report-link" href="{{ url_for('report_detail',report_id=report.id) }}"><span class="report-id">CD-{{ '%03d'|format(report.id) }}</span><strong>{{ report.title }}</strong></a><div class="row-sub">{{ icon('message') }} {{ report.comment_count }} komentarz{{ '' if report.comment_count==1 else 'y' if report.comment_count in [2,3,4] else 'y' }}{% if not report.approved %}<span class="pending-label">Oczekuje na akceptację</span>{% endif %}</div></td>
+<td>{{ badge(report) }}</td><td>{{ status_badge(report) }}</td><td><span class="author-cell"><span class="mini-avatar">{{ report.author[0]|upper }}</span>{{ report.author }}</span></td><td class="date-cell">{{ report.created_at|shortdate }}</td><td><a class="row-arrow" href="{{ url_for('report_detail',report_id=report.id) }}" aria-label="Otwórz zgłoszenie CD-{{ report.id }}">{{ icon('arrow-right') }}</a></td></tr>
+{% else %}<tr><td colspan="6"><div class="empty-state">{{ icon('folder') }}<h3>Brak zgłoszeń</h3><p>{{ 'Zmień filtry lub dodaj pierwsze zgłoszenie.' if scope!='admin' else 'Nie ma zgłoszeń spełniających te kryteria.' }}</p>{% if scope!='admin' %}<a href="{{ url_for('add_report') }}" class="button button-primary">{{ icon('plus') }} Dodaj zgłoszenie</a>{% endif %}</div></td></tr>{% endfor %}
+</tbody></table></div><div class="table-footer"><span>Liczba zgłoszeń: {{ total }} · strona {{ page }} z {{ pages }}</span><div class="pagination-controls">{% if page>1 %}<a class="button button-light button-small" href="{{ page_url(page-1) }}">Poprzednia</a>{% endif %}{% if page<pages %}<a class="button button-light button-small" href="{{ page_url(page+1) }}">Następna {{ icon('arrow-right') }}</a>{% endif %}</div></div></section>
+<div class="bottom-note">{{ icon('info') }}<p><strong>Dobre zgłoszenie przyspiesza naprawę.</strong> Dodaj dokładny opis, kroki odtworzenia i właściwy poziom zagrożenia.</p></div>
+{% endblock %}
