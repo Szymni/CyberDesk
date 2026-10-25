@@ -1,6 +1,10 @@
-FROM python:3.10-slim
+FROM python:3.12-slim
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-CMD ["python", "app.py"]
+RUN pip install --no-cache-dir -r requirements.txt && useradd --create-home --uid 10001 cyberdesk
+COPY --chown=cyberdesk:cyberdesk . .
+USER cyberdesk
+EXPOSE 5000
+ENTRYPOINT ["sh", "entrypoint.sh"]
+CMD ["python", "-m", "gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "4", "--access-logfile", "-", "app:app"]

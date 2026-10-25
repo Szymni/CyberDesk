@@ -1,27 +1,42 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: cyberdesk
+      POSTGRES_PASSWORD: ${DB_PASS:?Najpierw uruchom python setup_local.py}
       POSTGRES_DB: vulntrack
     volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5432:5432"
-
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cyberdesk -d vulntrack"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
   web:
     build: .
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"
     environment:
       DB_HOST: db
       DB_NAME: vulntrack
-      DB_USER: postgres
-      DB_PASS: password
-    volumes:
-      - .:/app
+      DB_USER: cyberdesk
+      DB_PASS: ${DB_PASS:?Najpierw uruchom python setup_local.py}
+      SECRET_KEY: ${SECRET_KEY:?Najpierw uruchom python setup_local.py}
+      DEMO_MODE: ${DEMO_MODE:-1}
+      COOKIE_SECURE: ${COOKIE_SECURE:-0}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health',timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+volumes:
+  pgdata:

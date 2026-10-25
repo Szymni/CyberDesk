@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block title %}Błąd {{ code }}{% endblock %}{% block content %}<section class="panel error-panel"><div class="error-number">{{ code }}</div><h1>{{ message }}</h1><p>Możesz wrócić do listy zgłoszeń i spróbować ponownie.</p><a class="button button-primary" href="{{ url_for('index') }}">{{ icon('arrow-left') }} Wróć do zgłoszeń</a></section>{% endblock %}

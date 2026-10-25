@@ -1,44 +1,11 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <title>Dodaj post - VulnTrack</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="/">🛡️ VulnTrack</a>
-        </div>
-    </nav>
-
-    <div class="container mt-5">
-        <div class="card mx-auto shadow-sm" style="max-width: 600px;">
-            <div class="card-body">
-                <h3 class="card-title mb-4">Zgłoś nową podatność</h3>
-                <form method="POST" action="/add_report">
-                    <div class="mb-3">
-                        <label class="form-label">Tytuł</label>
-                        <input type="text" name="title" class="form-control" placeholder="Np. XSS w komentarzach" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Szczegółowy opis</label>
-                        <textarea name="description" class="form-control" rows="4" placeholder="Opisz jak odtworzyć błąd..." required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Poziom zagrożenia</label>
-                        <select name="severity" class="form-select">
-                            <option value="Niska">Niska</option>
-                            <option value="Średnia">Średnia</option>
-                            <option value="Wysoka">Wysoka</option>
-                            <option value="Krytyczna">Krytyczna</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Dodaj post</button>
-                    <a href="/" class="btn btn-secondary">Anuluj</a>
-                </form>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+{% extends 'base.html' %}{% block title %}{{ 'Edytuj zgłoszenie' if report else 'Nowe zgłoszenie' }}{% endblock %}
+{% block breadcrumb %}{{ 'Edycja zgłoszenia' if report else 'Nowe zgłoszenie' }}{% endblock %}
+{% block content %}<a class="back-link" href="{{ url_for('report_detail',report_id=report.id) if report else url_for('my_reports') }}">{{ icon('arrow-left') }} {{ 'Wróć do zgłoszenia' if report else 'Moje zgłoszenia' }}</a>
+<div class="page-heading"><div><div class="eyebrow">{{ 'CD-%03d'|format(report.id) if report else 'POMÓŻ ZWIĘKSZYĆ BEZPIECZEŃSTWO' }}</div><h1>{{ 'Edytuj zgłoszenie' if report else 'Zgłoś podatność' }}</h1><p>Im dokładniejszy opis, tym szybsza analiza problemu.</p></div></div>
+<div class="form-layout"><section class="panel form-panel"><h2>{{ 'Dane zgłoszenia' if report else 'Opisz wykryty problem' }}</h2>
+<form method="post" class="stack-form">{{ csrf() }}<div><label for="title">Tytuł zgłoszenia <span class="required">*</span></label><input id="title" name="title" required minlength="3" maxlength="150" value="{{ request.form.get('title',report.title if report else '') }}" placeholder="Np. Nieautoryzowany dostęp do dokumentów"><small>Krótko i konkretnie. Maksymalnie 150 znaków.</small></div>
+<div><label for="severity">Poziom zagrożenia <span class="required">*</span></label><select id="severity" name="severity" required>{% for s in severities %}<option {{ 'selected' if request.form.get('severity',report.severity if report else 'Średnia')==s }}>{{ s }}</option>{% endfor %}</select></div>
+<div><label for="description">Szczegółowy opis <span class="required">*</span></label><textarea id="description" name="description" required minlength="10" maxlength="10000" rows="10" placeholder="Co się dzieje? Jak odtworzyć problem? Jakie powinno być prawidłowe zachowanie?">{{ request.form.get('description',report.description if report else '') }}</textarea><small>10–10 000 znaków. Opisy są wyświetlane jako zwykły tekst.</small></div>
+{% if not admin %}<div class="inline-info">{{ icon('info') }}<span>{{ 'Po edycji zgłoszenie wróci do moderacji i otrzyma status „Nowe”.' if report else 'Zgłoszenie pojawi się publicznie po akceptacji administratora. Do tego czasu znajdziesz je w „Moje zgłoszenia”.' }}</span></div>{% endif %}
+<div class="form-actions"><a class="button button-light" href="{{ url_for('report_detail',report_id=report.id) if report else url_for('my_reports') }}">Anuluj</a><button class="button button-primary">{{ icon('check-circle' if report else 'plus') }} {{ 'Zapisz zmiany' if report else 'Wyślij zgłoszenie' }}</button></div></form></section>
+<aside class="form-help"><div class="help-icon">{{ icon('shield') }}</div><h3>Co zawrzeć w opisie?</h3><ol><li><strong>Miejsce występowania</strong><p>Moduł, adres lub funkcja aplikacji.</p></li><li><strong>Kroki odtworzenia</strong><p>Krótka instrukcja pozwalająca powtórzyć problem.</p></li><li><strong>Możliwy wpływ</strong><p>Jakie dane lub działania są zagrożone?</p></li><li><strong>Oczekiwane zachowanie</strong><p>Jak system powinien się zachować?</p></li></ol><div class="help-note">Nie umieszczaj w zgłoszeniu prawdziwych haseł ani danych osobowych.</div></aside></div>{% endblock %}
