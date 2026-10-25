@@ -9,5 +9,5 @@ except FileExistsError:
     print('Plik .env już istnieje — pozostawiono bez zmian.')
 else:
     with os.fdopen(fd, 'w') as handle:
-        handle.write(f'SECRET_KEY={secrets.token_hex(32)}\nDB_PASS={secrets.token_urlsafe(32)}\nDEMO_MODE=1\nCOOKIE_SECURE=0\n')
+        handle.write(f'SECRET_KEY={secrets.token_hex(32)}\nDB_PASS={secrets.token_urlsafe(32)}\nDEMO_MODE=1\n')
     print('Utworzono konfigurację. Uruchom: docker compose up --build')

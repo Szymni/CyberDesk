@@ -1,28 +1,28 @@
-# CyberDesk
+# CyberDesk - L2
 
-Aplikacja do zgłaszania i śledzenia podatności, napisana we Flasku z bazą PostgreSQL. Frontend korzysta z HTML, CSS i Bootstrapa.
+Wersja deweloperska do lokalnego laboratorium. Flask, PostgreSQL, HTML/CSS i Bootstrap.
 
-Użytkownicy mogą dodawać i edytować własne zgłoszenia oraz je komentować. Administrator zatwierdza wpisy, zmienia statusy i moderuje treści.
+Rejestracja i logowanie, dodawanie oraz edycja zgłoszeń, statusy, komentarze, moderacja, wyszukiwarka i filtry.
 
 ## Uruchomienie
 
-Wymagania: Python 3.10+ oraz Docker z Compose.
-
-```bash
+```sh
 python setup_local.py
 docker compose up --build
 ```
 
-Strona będzie dostępna pod http://localhost:5000.
+Otwórz http://localhost:5000. W Dockerze uruchamia się serwer deweloperski Flaska. Baza ma trwały wolumen i kontrolę gotowości.
 
-Skrypt tworzy konfigurację w `.env`. Nie dodawaj tego pliku do repozytorium.
+Podgląd bez Dockera: zainstaluj requirements.txt i uruchom `python preview_server.py` (SQLite).
 
+## Zakres L2
 
-## Testy
+Celowo brak haszowania haseł, tokenów CSRF, limitu logowania, kontroli właściciela w endpointzie edycji i dziennika zmian. Te elementy są do wykonania na L7. Pozostają podstawowe logowanie i role dla panelu administratora. Zapytania parametryzowane i domyślne escapowanie Jinja pozostają jak w pierwotnym projekcie.
 
-```bash
-python -m pip install -r requirements-dev.txt
-python -m pytest tests -q
-```
+Nie ma Gunicorna, pipeline CI/CD ani dołączonego zestawu 25 testów z późniejszej wersji. Nie dodano celowo nowych podatności SQL Injection ani XSS. Debugger pozostaje wyłączony.
 
-Testy korzystają z SQLite. Szczegóły weryfikacji są w [VALIDATION.md](VALIDATION.md).
+To aplikacja celowo niezabezpieczona, tylko na localhost, z fikcyjnymi danymi. Nie używaj prawdziwych haseł i nie wystawiaj jej do internetu. Konta demo są opisane na lokalnej stronie logowania.
+
+Wolumen `pgdata_l2` jest osobny. Baza i hasze z poprzedniej wersji nie są nadpisywane; starych haszy nie da się zamienić z powrotem na hasła. W L2 konta zakłada się od nowa.
+
+Wynik sprawdzenia: VALIDATION.md.

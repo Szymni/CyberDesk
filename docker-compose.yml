@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASS:?Najpierw uruchom python setup_local.py}
       POSTGRES_DB: vulntrack
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata_l2:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U cyberdesk -d vulntrack"]
       interval: 3s
@@ -24,7 +24,6 @@ services:
       DB_PASS: ${DB_PASS:?Najpierw uruchom python setup_local.py}
       SECRET_KEY: ${SECRET_KEY:?Najpierw uruchom python setup_local.py}
       DEMO_MODE: ${DEMO_MODE:-1}
-      COOKIE_SECURE: ${COOKIE_SECURE:-0}
     depends_on:
       db:
         condition: service_healthy
@@ -34,9 +33,6 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
-    read_only: true
-    tmpfs:
-      - /tmp
     restart: unless-stopped
 volumes:
-  pgdata:
+  pgdata_l2:
