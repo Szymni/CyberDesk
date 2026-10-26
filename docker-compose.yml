@@ -36,7 +36,11 @@ services:
       start_period: 30s
     read_only: true
     tmpfs:
-      - /tmp
+      - /tmp:size=16M,noexec,nosuid,nodev
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true 
     restart: unless-stopped
 volumes:
   pgdata:
