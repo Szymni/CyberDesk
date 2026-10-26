@@ -3,7 +3,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && useradd --create-home --uid 10001 cyberdesk
-COPY --chown=cyberdesk:cyberdesk . .
+COPY . .
 USER cyberdesk
 EXPOSE 5000
 ENTRYPOINT ["sh", "entrypoint.sh"]
