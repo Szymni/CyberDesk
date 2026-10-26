@@ -1,2 +1,16 @@
-cd ~/VulnTrack
-echo -e "__pycache__/\n*.pyc\n.env\nvenv/" > .gitignore
+# Environments and secrets
+.env
+venv/
+env/
+instance/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS and Editor files
+.DS_Store
+.vscode/
+.idea/
+

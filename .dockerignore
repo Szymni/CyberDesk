@@ -1,0 +1,29 @@
+# Git and documentation
+.git/
+.gitignore
+*.md
+
+# Secrets and local databases
+.env
+instance/
+
+# Tests, dev scripts, and orchestration
+tests/
+venv/
+requirements-dev.txt
+preview_server.py
+setup_local.py
+docker-compose.yml
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+
+
+
+
+
+
+
+
+
